@@ -3,9 +3,92 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
 
+        // Create knowledge base and models
+        Sentence KB = createKB();
+        Sentence alpha1 = createAlpha1();
+        Sentence alpha2 = createAlpha2();
+        Sentence alpha3 = createAlpha3();
+        Sentence alpha4 = createAlpha4();
+
+        System.out.println("The Knowledge base is: P => Q");
+        System.out.println("The model alpha1 is: (not P) or Q");
+        System.out.println("The model alphs2 is: P and (not Q)");
+        System.out.println("The model alpha3 is: P and Q");
+        System.out.println("The model alphs4 is: P => Q");
+        System.out.println();
+
+        System.out.println("The KB entails alpha1: " + TT_Entails(KB, alpha1));
+        System.out.println("The KB entails alpha2: " + TT_Entails(KB, alpha2));
+        System.out.println("The KB entails alpha3: " + TT_Entails(KB, alpha3));
+        System.out.println("The KB entails alpha4: " + TT_Entails(KB, alpha4));
     }
     
-    public ArrayList<String> getSymbols(Sentence s) {
+    // Create knowledge base P=>Q
+    public static Sentence createKB() {
+        Sentence KB = new Sentence(null, "if", 2);
+        Sentence P = new Sentence("P", null, 0);
+        Sentence Q = new Sentence("Q", null, 0);
+
+        KB.children[0] = P;
+        KB.children[1] = Q;
+
+        return KB;
+    }
+
+    // Create model alpha1 (not P) or Q
+    public static Sentence createAlpha1() {
+        Sentence alpha1 = new Sentence(null, "or", 2);
+        Sentence not = new Sentence(null, "not", 1);
+        Sentence P = new Sentence("P", null, 0);
+        Sentence Q = new Sentence("Q", null, 0);
+
+        alpha1.children[0] = not;
+        alpha1.children[1] = Q;
+        not.children[0] = P;
+
+        return alpha1;
+    }
+
+    // Create model alpha2 P and (not Q)
+    public static Sentence createAlpha2() {
+        Sentence alpha2 = new Sentence(null, "and", 2);
+        Sentence P = new Sentence("P", null, 0);
+        Sentence not = new Sentence(null, "not", 1);
+        Sentence Q = new Sentence("Q", null, 0);
+
+        alpha2.children[0] = P;
+        alpha2.children[1] = not;
+        not.children[0] = Q;
+
+        return alpha2;
+    }
+
+    // Create model alpha3 P and Q
+    public static Sentence createAlpha3() {
+        Sentence alpha3 = new Sentence(null, "and", 2);
+        Sentence P = new Sentence("P", null, 0);
+        Sentence Q = new Sentence("Q", null, 0);
+
+        alpha3.children[0] = P;
+        alpha3.children[1] = Q;
+
+        return alpha3;
+    }
+
+    // Create model alpha4 P => P
+    public static Sentence createAlpha4() {
+        Sentence alpha3 = new Sentence(null, "if", 2);
+        Sentence P1 = new Sentence("P", null, 0);
+        Sentence P2 = new Sentence("P", null, 0);
+
+        alpha3.children[0] = P1;
+        alpha3.children[1] = P2;
+
+        return alpha3;
+    }
+
+    // Return array list of symbols from sentence class
+    public static ArrayList<String> getSymbols(Sentence s) {
         ArrayList<String> symbolList = new ArrayList<>();
 
         if (s.symbol != null) {
@@ -19,7 +102,8 @@ public class Main {
         return symbolList;
     }
 
-    public Boolean PL_True(Sentence s, HashMap<String, Boolean> model) {
+    // Return true if a sentence holds within a model
+    public static Boolean PL_True(Sentence s, HashMap<String, Boolean> model) {
         if (s.symbol != null) {
             return model.get(s.symbol);
         } else if (s.connective == "and") {
@@ -60,7 +144,8 @@ public class Main {
         }
     }
 
-    public Boolean TT_Entails(Sentence KB, Sentence alpha) {
+    // Return true if knowledge base entail model
+    public static Boolean TT_Entails(Sentence KB, Sentence alpha) {
         ArrayList<String> KBSymbols = getSymbols(KB);
         ArrayList<String> alphaSymbols = getSymbols(alpha);
 
@@ -70,13 +155,14 @@ public class Main {
         // Add alpha symbol list
         allSymbols.addAll(alphaSymbols);
 
-        //
+        // Create empty map
         HashMap<String, Boolean> model = new HashMap<>();
 
         return TT_Check_All(KB, alpha, allSymbols, model);
     }
 
-    public Boolean TT_Check_All(Sentence KB, Sentence alpha, ArrayList<String> symbols, HashMap<String, Boolean> model) {
+    // Return if knowledge base entails model
+    public static Boolean TT_Check_All(Sentence KB, Sentence alpha, ArrayList<String> symbols, HashMap<String, Boolean> model) {
         if (symbols.isEmpty()) {
             if (PL_True(KB, model)) {
                 return PL_True(alpha, model);
